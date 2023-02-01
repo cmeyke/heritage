@@ -55,7 +55,7 @@ describe("Heritage", function () {
 
       await expect(heritage.connect(heir).acceptInheritance(false)).to.be.rejected;
       await passTime(oneYear+1);
-      await expect(heritage.connect(heir).acceptInheritance(false)).not.to.be.rejected;
+      await expect(heritage.connect(heir).acceptInheritance(false)).to.not.be.rejected;
     });
 
     it("Should only allow the heir to accept the inheritance", async function () {
@@ -64,7 +64,7 @@ describe("Heritage", function () {
 
       await passTime(oneYear+1);
       await expect(heritage.acceptInheritance(false)).to.be.rejected;
-      await expect(heritage.connect(heir).acceptInheritance(false)).not.to.be.rejected;
+      await expect(heritage.connect(heir).acceptInheritance(false)).to.not.be.rejected;
     });
 
     it("Should set the right roles after inheritance acceptance", async function () {
@@ -73,6 +73,7 @@ describe("Heritage", function () {
 
       await passTime(oneYear+1);
       await heritage.connect(heir).acceptInheritance(true);
+      expect(await heritage.hasRole(APPOINTER_ROLE, appointer.address)).to.equal(false);
       expect(await heritage.hasRole(HEIR_ROLE, heir.address)).to.equal(false);
       expect(await heritage.hasRole(APPOINTER_ROLE, heir.address)).to.equal(true);
       expect(await heritage.hasRole(DEFAULT_ADMIN_ROLE, heir.address)).to.equal(true);
@@ -86,7 +87,7 @@ describe("Heritage", function () {
 
       await appointer.sendTransaction({ to: heritage.address, value: oneEther });
       const balance = await ethers.provider.getBalance(heritage.address);
-      expect(balance).equal(initialWeiBalance.add(oneEther));
+      expect(balance).to.equal(initialWeiBalance.add(oneEther));
     });
 
     it("Appointer should be able to transfer ether", async function () {
@@ -96,7 +97,7 @@ describe("Heritage", function () {
       const initialBalance = await ethers.provider.getBalance(heir.address);
       await heritage.executeTransaction(heir.address, oneEther, "0x");
       const balance = await ethers.provider.getBalance(heir.address);
-      expect(balance).equal(initialBalance.add(oneEther));
+      expect(balance).to.equal(initialBalance.add(oneEther));
     });
 
     it("Only appointer should be able to transfer ether", async function () {
@@ -104,7 +105,7 @@ describe("Heritage", function () {
         await loadFixture(deployHeritageFixture);
 
       await expect(heritage.connect(heir).executeTransaction(heir.address, oneEther, "0x")).to.be.rejected;
-      await expect(heritage.executeTransaction(heir.address, oneEther, "0x")).not.to.be.rejected;
+      await expect(heritage.executeTransaction(heir.address, oneEther, "0x")).to.not.be.rejected;
     });
   });
 
@@ -114,7 +115,7 @@ describe("Heritage", function () {
         await loadFixture(deployHeritageFixture);
 
       const balance = await token.balanceOf(heritage.address);
-      expect(balance.toNumber()).equal(initialTokenBalance);
+      expect(balance.toNumber()).to.equal(initialTokenBalance);
     });
 
     it("Appointer should be able to transfer ERC20 tokens", async function () {
@@ -123,8 +124,8 @@ describe("Heritage", function () {
       
       const data = token.interface.encodeFunctionData("transfer", [heir.address, initialTokenBalance]);
       await heritage.executeTransaction(token.address, 0, data);
-      expect((await token.balanceOf(heritage.address)).toNumber()).equal(0);
-      expect((await token.balanceOf(heir.address)).toNumber()).equal(initialTokenBalance);
+      expect((await token.balanceOf(heritage.address)).toNumber()).to.equal(0);
+      expect((await token.balanceOf(heir.address)).toNumber()).to.equal(initialTokenBalance);
     });
 
 
@@ -134,7 +135,7 @@ describe("Heritage", function () {
 
       const data = token.interface.encodeFunctionData("transfer", [heir.address, initialTokenBalance]);
       await expect(heritage.connect(heir).executeTransaction(token.address, 0, data)).to.be.rejected;
-      await expect(heritage.executeTransaction(token.address, 0, data)).not.to.be.rejected;
+      await expect(heritage.executeTransaction(token.address, 0, data)).to.not.be.rejected;
     });
   });
 });
