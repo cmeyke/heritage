@@ -33,12 +33,12 @@ contract Heritage is AccessControlEnumerable {
         require(success);
     }
 
-    function disinherit(address _heir) external onlyRole(APPOINTER_ROLE) {
-        _revokeRole(HEIR_ROLE, _heir);
-    }
-
     function inherit(address _heir) external onlyRole(APPOINTER_ROLE) {
         _grantRole(HEIR_ROLE, _heir);
+    }
+
+    function disinherit(address _heir) external onlyRole(APPOINTER_ROLE) {
+        _revokeRole(HEIR_ROLE, _heir);
     }
 
     function alive(uint256 _timeAlive) external onlyRole(APPOINTER_ROLE) {
@@ -86,6 +86,14 @@ contract Heritage is AccessControlEnumerable {
         }
     }
 
+    function disinheritAll() external onlyRole(APPOINTER_ROLE) {
+        revokeAllHeir();
+    }
+
+    function revokeAllOtherAppointer() external onlyRole(APPOINTER_ROLE) {
+        revokeAllAppointer(msg.sender);
+    }
+
     function acceptInheritance(bool reset)
         external
         onlyRole(HEIR_ROLE)
@@ -99,13 +107,5 @@ contract Heritage is AccessControlEnumerable {
         }
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(APPOINTER_ROLE, msg.sender);
-    }
-
-    function disinheritAll() external onlyRole(APPOINTER_ROLE) {
-        revokeAllHeir();
-    }
-
-    function revokeAllOtherAppointer() external onlyRole(APPOINTER_ROLE) {
-        revokeAllAppointer(msg.sender);
     }
 }
