@@ -5,7 +5,7 @@ export default function Navbar() {
   const { colorMode, toggleColorMode } = useColorMode()
 
   return (
-    <Flex as="nav" alignItems="center" padding="16px">
+    <Flex as="nav" alignItems="center" padding="14px" borderBottomWidth="1px">
       <Button>
         <HamburgerIcon />
       </Button>
