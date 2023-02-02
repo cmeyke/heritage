@@ -1,16 +1,10 @@
-import { useColorMode, Button } from '@chakra-ui/react'
 import './App.css'
+import Navbar from './components/Navbar.jsx'
 
 function App() {
-  const { colorMode, toggleColorMode } = useColorMode()
-
   return (
     <div className="App">
-      <header>
-        <Button onClick={toggleColorMode}>
-          Toggle {colorMode === 'light' ? 'Dark' : 'Light'}
-        </Button>
-      </header>
+      <Navbar />
     </div>
   )
 }
