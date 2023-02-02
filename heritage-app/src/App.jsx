@@ -1,12 +1,19 @@
+import { useColorMode, Button } from '@chakra-ui/react'
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import './App.css'
 
 function App() {
   const [count, setCount] = useState(0)
+  const { colorMode, toggleColorMode } = useColorMode()
 
   return (
     <div className="App">
+      <header>
+        <Button onClick={toggleColorMode}>
+          Toggle {colorMode === 'light' ? 'Dark' : 'Light'}
+        </Button>
+      </header>
       <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src="/vite.svg" className="logo" alt="Vite logo" />
