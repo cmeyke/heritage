@@ -9,20 +9,20 @@ async function main() {
     console.log("Verifying contract ...");
     try {
       await run("verify:verify", {
-          address: heritageAddress,
-          constructorArguments: args,
+        address: heritageAddress,
+        constructorArguments: args,
       });
     } catch (e) {
       if (e.message.toLowerCase().includes("already verified")) {
-          console.log("Already verified!");
+        console.log("Already verified!");
       } else {
-          console.log(e);
+        console.log(e);
       }
     }
   }
 }
 
 main().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
+  console.error(error);
+  process.exitCode = 1;
 });
