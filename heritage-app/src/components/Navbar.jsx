@@ -35,7 +35,7 @@ export default function Navbar() {
             console.log("already connected:", address);
           }
         }}>
-        {(address === "") ? "Connect Wallet" : displayAddress}
+        {address === "" ? "Connect Wallet" : displayAddress}
       </Button>
       <Spacer />
       <Button onClick={toggleColorMode}>
