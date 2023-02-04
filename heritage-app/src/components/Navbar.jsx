@@ -15,6 +15,12 @@ import {
   Input,
   Text,
   Box,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from '@chakra-ui/react'
 import {
   MoonIcon,
@@ -30,6 +36,10 @@ import Heritage from '../artifacts/contracts/Heritage.sol/Heritage.json';
 async function connectWallet(setSigner, setAddress, setWalletBalance, setProvider) {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   await provider.send("eth_requestAccounts", []);
+  const network = await provider.getNetwork();
+  if (network.name !== "goerli") {
+    return false;
+  }
   const signer = provider.getSigner();
   const address = await signer.getAddress();
   const balance = await getEthBalance(signer, null);
@@ -37,6 +47,7 @@ async function connectWallet(setSigner, setAddress, setWalletBalance, setProvide
   setSigner(signer);
   setProvider(provider);
   setAddress(address);
+  return true;
 }
 
 async function connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address) {
@@ -95,8 +106,8 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
                 value={contractAddress}
                 onKeyPress={event => {
                   if (event.key === 'Enter') {
-                    connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address);
                     onClose();
+                    connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address);
                   }
                 }}
               />
@@ -106,8 +117,8 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
             <Button
               mr={3}
               onClick={() => {
-                connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address);
                 onClose();
+                connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address);
               }}>
                 OK
             </Button>
@@ -160,52 +171,81 @@ export default function Navbar() {
   const [contractAddress, setContractAddress] = useState(getStoredContractAddress());
   const [walletBalance, setWalletBalance] = useState("");
   const [contractBalance, setContractBalance] = useState("");
-  const [role, setRole] = useState("none")
+  const [role, setRole] = useState("none");
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const cancelRef = useRef();
 
   return (
-    <Flex as="nav" alignItems="center" padding="14px" borderBottomWidth="1px" fontSize='xl'>
-      <Button>
-        <HamburgerIcon />
-      </Button>
-      <Text marginLeft="14px">
-        Wallet:
-      </Text>
-      <Button marginLeft="14px" onClick={() => {
-          if (address === "") {
-            connectWallet(setSigner, setAddress, setWalletBalance, setProvider, setProvider);
-          } else {
-            console.log("already connected:", address);
-          }
-        }}>
-        {address === "" ? "Connect" : formatAddress(address)}
-      </Button>
-      <Text fontSize='sm' marginLeft="14px">{walletBalance ? "ETH" : ""}</Text>
-      <Box marginLeft="8px"/>
-      <Text>{walletBalance}</Text>
-      <Text marginLeft="28px">
-        Contract:
-      </Text>
-      <ContractButton
-        signer={signer}
-        contract={contract}
-        setContract={setContract}
-        contractAddress={contractAddress}
-        setContractAddress={setContractAddress}
-        setContractBalance={setContractBalance}
-        provider={provider}
-        setRole={setRole}
-        address={address}
-      />
-      <Text fontSize='sm' marginLeft="14px">{contractBalance ? "ETH" : ""}</Text>
-      <Box marginLeft="8px"/>
-      <Text>{contractBalance}</Text>
-      <Text marginLeft="28px">
-        Role: {role}
-      </Text>
-      <Spacer />
-      <Button onClick={toggleColorMode}>
-        {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
-      </Button>
-    </Flex>
+    <>
+      <Flex as="nav" alignItems="center" padding="14px" borderBottomWidth="1px" fontSize='xl'>
+        <Button>
+          <HamburgerIcon />
+        </Button>
+        <Text marginLeft="14px">
+          Wallet:
+        </Text>
+        <Button marginLeft="14px" onClick={async () => {
+            if (address === "") {
+              const connected = await connectWallet(setSigner, setAddress, setWalletBalance, setProvider, setProvider);
+              if (!connected) {
+                onOpen();
+              }
+            } else {
+              console.log("already connected:", address);
+            }
+          }}>
+          {address === "" ? "Connect" : formatAddress(address)}
+        </Button>
+        <Text fontSize='sm' marginLeft="14px">{walletBalance ? "ETH" : ""}</Text>
+        <Box marginLeft="8px"/>
+        <Text>{walletBalance}</Text>
+        <Text marginLeft="28px">
+          Contract:
+        </Text>
+        <ContractButton
+          signer={signer}
+          contract={contract}
+          setContract={setContract}
+          contractAddress={contractAddress}
+          setContractAddress={setContractAddress}
+          setContractBalance={setContractBalance}
+          provider={provider}
+          setRole={setRole}
+          address={address}
+        />
+        <Text fontSize='sm' marginLeft="14px">{contractBalance ? "ETH" : ""}</Text>
+        <Box marginLeft="8px"/>
+        <Text>{contractBalance}</Text>
+        <Text marginLeft="28px">
+          Role: {role}
+        </Text>
+        <Spacer />
+        <Button onClick={toggleColorMode}>
+          {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
+        </Button>
+      </Flex>
+
+      <AlertDialog
+        isOpen={isOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              Connect Wallet
+            </AlertDialogHeader>
+            <AlertDialogBody>
+              Heritage is alpha software and can only be used on the goerli network! Please change your wallet to goerli!
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                OK
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+    </>
   )
 }
