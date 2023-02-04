@@ -60,6 +60,7 @@ async function connectContract(signer, contract, setContract, contractAddress, s
     } else if (await heritage.hasRole(HEIR_ROLE, address)) {
       setRole("Heir");
     }        
+    localStorage.setItem("contractAddress", contractAddress);
   } else {
     setContract(null);
   }
@@ -105,7 +106,7 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
             <Button
               mr={3}
               onClick={() => {
-                connectContract(signer, contract, setContract, contractAddress, setContractAddress, provider, setRole, address);
+                connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address);
                 onClose();
               }}>
                 OK
@@ -140,6 +141,15 @@ async function getEthBalance(signer, provider, address) {
   }
   return formaterETH(balance);
 }
+
+function getStoredContractAddress() {
+  const address = localStorage.getItem("contractAddress");
+  if (address === null) {
+    return "";
+  } else {
+    return address;
+  }
+}
     
 export default function Navbar() {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -147,7 +157,7 @@ export default function Navbar() {
   const [signer, setSigner] = useState(null);
   const [address, setAddress] = useState("");
   const [contract, setContract] = useState(null);
-  const [contractAddress, setContractAddress] = useState("");
+  const [contractAddress, setContractAddress] = useState(getStoredContractAddress());
   const [walletBalance, setWalletBalance] = useState("");
   const [contractBalance, setContractBalance] = useState("");
   const [role, setRole] = useState("none")
