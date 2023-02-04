@@ -23,6 +23,8 @@ import {
 import { useState, useRef } from 'react'
 import { ethers } from "ethers";
 
+import Heritage from '../artifacts/contracts/Heritage.sol/Heritage.json';
+
 async function connectWallet(setSigner, setAddress) {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   await provider.send("eth_requestAccounts", []);
@@ -32,18 +34,36 @@ async function connectWallet(setSigner, setAddress) {
   setAddress(address);
 }
 
-async function connectContract(contract, setContract, contractAddress, setContractAddress) {
-  console.log(contractAddress);
+async function connectContract(signer, contract, setContract, contractAddress, setContractAddress) {
+  if (signer !== null && ethers.utils.isAddress(contractAddress)) {
+    if (contract !== null) {
+      const address = await contract.address;
+      if (address.toLowerCase() === contractAddress.toLowerCase()) {
+        console.log("contract already connected");
+        return;
+      }
+    }
+
+    const heritage = new ethers.Contract(contractAddress, Heritage.abi, signer);
+    setContract(heritage);
+  } else {
+    setContract(null);
+  }
 }
 
-function ContractButton({contract, setContract, contractAddress, setContractAddress}) {
+function DisplayContractAddress({contract, contractAddress}) {
+  const address = displayAddress(contractAddress);
+  return <>{contract === null || address === "" ? "Contract" : address}</>;
+}
+
+function ContractButton({signer, contract, setContract, contractAddress, setContractAddress}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const addressRef = useRef(null);
 
   return (
     <>
       <Button marginLeft="14px" onClick={onOpen}>
-        Contract
+        <DisplayContractAddress contract={contract} contractAddress={contractAddress} />
       </Button>
 
       <Modal initialFocusRef={addressRef} isOpen={isOpen} onClose={onClose}>
@@ -60,7 +80,7 @@ function ContractButton({contract, setContract, contractAddress, setContractAddr
                 value={contractAddress}
                 onKeyPress={event => {
                   if (event.key === 'Enter') {
-                    connectContract(contract, setContract, contractAddress, setContractAddress);
+                    connectContract(signer, contract, setContract, contractAddress, setContractAddress);
                     onClose();
                   }
                 }}
@@ -71,7 +91,7 @@ function ContractButton({contract, setContract, contractAddress, setContractAddr
             <Button
               mr={3}
               onClick={() => {
-                connectContract(contract, setContract, contractAddress, setContractAddress);
+                connectContract(signer, contract, setContract, contractAddress, setContractAddress);
                 onClose();
               }}>
                 OK
@@ -84,6 +104,15 @@ function ContractButton({contract, setContract, contractAddress, setContractAddr
   );
 }
 
+function displayAddress(address) {
+  return ethers.utils.isAddress(address)
+  ? `${address.slice(0, 6)}...${address.slice(
+      address.length - 4,
+      address.length
+    )}`
+  : '';
+}
+    
 export default function Navbar() {
   const { colorMode, toggleColorMode } = useColorMode();
   const [signer, setSigner] = useState(null);
@@ -91,13 +120,6 @@ export default function Navbar() {
   const [contract, setContract] = useState(null);
   const [contractAddress, setContractAddress] = useState("");
 
-  const displayAddress = ethers.utils.isAddress(address)
-  ? `${address.slice(0, 6)}...${address.slice(
-      address.length - 4,
-      address.length
-    )}`
-  : '';
-    
   return (
     <Flex as="nav" alignItems="center" padding="14px" borderBottomWidth="1px" fontSize='xl'>
       <Button>
@@ -110,9 +132,10 @@ export default function Navbar() {
             console.log("already connected:", address);
           }
         }}>
-        {address === "" ? "Connect Wallet" : displayAddress}
+        {address === "" ? "Connect Wallet" : displayAddress(address)}
       </Button>
       <ContractButton
+        signer={signer}
         contract={contract}
         setContract={setContract}
         contractAddress={contractAddress}
