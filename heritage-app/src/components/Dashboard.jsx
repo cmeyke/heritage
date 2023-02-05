@@ -6,7 +6,6 @@ import {
   TableContainer,
   Tbody,
   Td,
-  Text,
   Tr,
   GridItem
 } from "@chakra-ui/react";
@@ -26,16 +25,22 @@ export default function Dashboard({role, alive, timeAlive}) {
             <Table>
               <Tbody>
                 <Tr>
-                  <Td><Text>Role</Text></Td>
-                  <Td><Text>{role}</Text></Td>
+                  <Td>Role</Td>
+                  <Td>{role}</Td>
                 </Tr>
                 <Tr>
-                  <Td><Text>Alive Interval</Text></Td>
-                  <Td><Text>{timeAlive} {timeAlive === "1" ? "Day" : "Days"}</Text></Td>
+                  <Td>Alive left</Td>
+                  <Td><Button fontSize='xl'>{alive} {alive == 1 ? "Day" : "Days"}</Button></Td>
                 </Tr>
                 <Tr>
-                  <Td><Text>Alive left</Text></Td>
-                  <Td><Button><Text fontSize='xl'>{alive} {alive === "1" ? "Day" : "Days"}</Text></Button></Td>
+                  <Td>Alive Interval</Td>
+                  <Td>{timeAlive} {timeAlive == 1 ? "Day" : "Days"}</Td>
+                </Tr>
+                <Tr>
+                  <Td># Heirs</Td>
+                </Tr>
+                <Tr>
+                  <Td># Appointers</Td>
                 </Tr>
               </Tbody>
             </Table>
