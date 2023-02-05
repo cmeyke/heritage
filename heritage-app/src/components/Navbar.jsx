@@ -14,7 +14,6 @@ import {
   FormControl,
   Input,
   Text,
-  Box,
   AlertDialog,
   AlertDialogBody,
   AlertDialogFooter,
@@ -25,7 +24,7 @@ import {
 import {
   MoonIcon,
   SunIcon,
-  HamburgerIcon,
+  RepeatIcon,
 } from '@chakra-ui/icons'
 
 import { useState, useRef, useEffect } from 'react'
@@ -50,6 +49,27 @@ async function connectWallet(setSigner, setAddress, setWalletBalance, setProvide
   return true;
 }
 
+async function updateContractData(contract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive) {
+  if (contract !== null) {
+    const balance = await getEthBalance(null, provider, contractAddress);
+    setContractBalance(balance);
+    const APPOINTER_ROLE = await contract.APPOINTER_ROLE();
+    const HEIR_ROLE = await contract.HEIR_ROLE();
+    if (await contract.hasRole(APPOINTER_ROLE, address)) {
+      setRole("Appointer");
+    } else if (await contract.hasRole(HEIR_ROLE, address)) {
+      setRole("Heir");
+    }
+    const timeAlive = (await contract.timeAlive()).toNumber();
+    const startTime = (await contract.startTime()).toNumber();
+    const blockNumber = await provider.getBlockNumber()
+    const timestamp = (await provider.getBlock(blockNumber)).timestamp;
+    const alive = Math.round((startTime + timeAlive - timestamp) / (60*60*24));
+    setAlive(alive);
+    setTimeAlive(Math.round(timeAlive/(60*60*24)));
+  }
+}
+
 async function connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive) {
   if (signer !== null && ethers.utils.isAddress(contractAddress)) {
     if (contract !== null) {
@@ -62,22 +82,7 @@ async function connectContract(signer, contract, setContract, contractAddress, s
 
     const heritage = new ethers.Contract(contractAddress, Heritage.abi, signer);
     setContract(heritage);
-    const balance = await getEthBalance(null, provider, contractAddress);
-    setContractBalance(balance);
-    const APPOINTER_ROLE = await heritage.APPOINTER_ROLE();
-    const HEIR_ROLE = await heritage.HEIR_ROLE();
-    if (await heritage.hasRole(APPOINTER_ROLE, address)) {
-      setRole("Appointer");
-    } else if (await heritage.hasRole(HEIR_ROLE, address)) {
-      setRole("Heir");
-    }
-    const timeAlive = (await heritage.timeAlive()).toNumber();
-    const startTime = (await heritage.startTime()).toNumber();
-    const blockNumber = await provider.getBlockNumber()
-    const timestamp = (await provider.getBlock(blockNumber)).timestamp;
-    const alive = Math.round((startTime + timeAlive - timestamp) / (60*60*24));
-    setAlive(alive);
-    setTimeAlive(Math.round(timeAlive/(60*60*24)));
+    updateContractData(heritage, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive);
     localStorage.setItem("contractAddress", contractAddress);
   } else {
     setContract(null);
@@ -188,14 +193,16 @@ export default function Navbar({role, setRole, setAlive, setTimeAlive}) {
   useEffect(() => {
     connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive);
   }, [signer]);
-  
-  
 
   return (
     <>
       <Flex as="nav" alignItems="center" padding="14px" borderBottomWidth="1px" fontSize='xl'>
-        <Button>
-          <HamburgerIcon />
+        <Button onClick={async () => {
+          updateContractData(contract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive);
+          const balance = await getEthBalance(signer, null);
+          setWalletBalance(balance);
+        }}>
+          <RepeatIcon />
         </Button>
         <Text marginLeft="14px">
           Wallet:
