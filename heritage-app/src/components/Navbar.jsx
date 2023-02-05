@@ -28,7 +28,7 @@ import {
   HamburgerIcon,
 } from '@chakra-ui/icons'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ethers } from "ethers";
 
 import Heritage from '../artifacts/contracts/Heritage.sol/Heritage.json';
@@ -180,6 +180,16 @@ export default function Navbar({role, setRole, setAlive, setTimeAlive}) {
   const [contractBalance, setContractBalance] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef();
+
+  useEffect(() => {
+    connectWallet(setSigner, setAddress, setWalletBalance, setProvider, setProvider);
+  }, []);
+
+  useEffect(() => {
+    connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive);
+  }, [signer]);
+  
+  
 
   return (
     <>
