@@ -50,7 +50,7 @@ async function connectWallet(setSigner, setAddress, setWalletBalance, setProvide
   return true;
 }
 
-async function connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address) {
+async function connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive) {
   if (signer !== null && ethers.utils.isAddress(contractAddress)) {
     if (contract !== null) {
       const address = await contract.address;
@@ -70,7 +70,14 @@ async function connectContract(signer, contract, setContract, contractAddress, s
       setRole("Appointer");
     } else if (await heritage.hasRole(HEIR_ROLE, address)) {
       setRole("Heir");
-    }        
+    }
+    const timeAlive = (await heritage.timeAlive()).toNumber();
+    const startTime = (await heritage.startTime()).toNumber();
+    const blockNumber = await provider.getBlockNumber()
+    const timestamp = (await provider.getBlock(blockNumber)).timestamp;
+    const alive = Math.round((startTime + timeAlive - timestamp) / (60*60*24));
+    setAlive(alive);
+    setTimeAlive(Math.round(timeAlive/(60*60*24)));
     localStorage.setItem("contractAddress", contractAddress);
   } else {
     setContract(null);
@@ -82,7 +89,7 @@ function DisplayContractAddress({contract, contractAddress}) {
   return <>{contract === null || address === "" ? "Connect" : address}</>;
 }
 
-function ContractButton({signer, contract, setContract, contractAddress, setContractAddress, setContractBalance, provider, setRole, address}) {
+function ContractButton({signer, contract, setContract, contractAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const addressRef = useRef(null);
 
@@ -107,7 +114,7 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
                 onKeyPress={event => {
                   if (event.key === 'Enter') {
                     onClose();
-                    connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address);
+                    connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive);
                   }
                 }}
               />
@@ -118,7 +125,7 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
               mr={3}
               onClick={() => {
                 onClose();
-                connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address);
+                connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive);
               }}>
                 OK
             </Button>
@@ -162,7 +169,7 @@ function getStoredContractAddress() {
   }
 }
     
-export default function Navbar() {
+export default function Navbar({role, setRole, setAlive, setTimeAlive}) {
   const { colorMode, toggleColorMode } = useColorMode();
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
@@ -171,7 +178,6 @@ export default function Navbar() {
   const [contractAddress, setContractAddress] = useState(getStoredContractAddress());
   const [walletBalance, setWalletBalance] = useState("");
   const [contractBalance, setContractBalance] = useState("");
-  const [role, setRole] = useState("none");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const cancelRef = useRef();
 
@@ -196,9 +202,9 @@ export default function Navbar() {
           }}>
           {address === "" ? "Connect" : formatAddress(address)}
         </Button>
-        <Text fontSize='sm' marginLeft="14px">{walletBalance ? "ETH" : ""}</Text>
-        <Box marginLeft="8px"/>
-        <Text>{walletBalance}</Text>
+        <Text marginLeft="14px">
+        {walletBalance ? "Ξ" : ""} {walletBalance}
+        </Text>
         <Text marginLeft="28px">
           Contract:
         </Text>
@@ -212,12 +218,11 @@ export default function Navbar() {
           provider={provider}
           setRole={setRole}
           address={address}
+          setAlive={setAlive}
+          setTimeAlive={setTimeAlive}
         />
-        <Text fontSize='sm' marginLeft="14px">{contractBalance ? "ETH" : ""}</Text>
-        <Box marginLeft="8px"/>
-        <Text>{contractBalance}</Text>
-        <Text marginLeft="28px">
-          Role: {role}
+        <Text marginLeft="14px">
+          {contractBalance ? "Ξ" : ""} {contractBalance}
         </Text>
         <Spacer />
         <Button onClick={toggleColorMode}>
