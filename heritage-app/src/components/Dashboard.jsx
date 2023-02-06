@@ -10,7 +10,7 @@ import {
   GridItem
 } from "@chakra-ui/react";
 
-export default function Dashboard({role, alive, timeAlive}) {
+export default function Dashboard({role, alive, timeAlive, numberOfHeirs, numberOfAppointers}) {
   return (
     <Grid
       templateColumns="repeat(3, 1fr)"
@@ -38,9 +38,11 @@ export default function Dashboard({role, alive, timeAlive}) {
                 </Tr>
                 <Tr>
                   <Td># Heirs</Td>
+                  <Td>{numberOfHeirs}</Td>
                 </Tr>
                 <Tr>
                   <Td># Appointers</Td>
+                  <Td>{numberOfAppointers}</Td>
                 </Tr>
               </Tbody>
             </Table>

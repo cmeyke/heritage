@@ -49,7 +49,7 @@ async function connectWallet(setSigner, setAddress, setWalletBalance, setProvide
   return true;
 }
 
-async function updateContractData(contract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive) {
+async function updateContractData(contract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers) {
   if (contract !== null) {
     const balance = await getEthBalance(null, provider, contractAddress);
     setContractBalance(balance);
@@ -67,10 +67,14 @@ async function updateContractData(contract, contractAddress, setContractBalance,
     const alive = Math.round((startTime + timeAlive - timestamp) / (60*60*24));
     setAlive(alive);
     setTimeAlive(Math.round(timeAlive/(60*60*24)));
+    const numberOfHeirs = await contract.getRoleMemberCount(HEIR_ROLE);
+    setNumberOfHeirs(numberOfHeirs.toNumber());
+    const numberOfAppointers = await contract.getRoleMemberCount(APPOINTER_ROLE);
+    setNumberOfAppointers(numberOfAppointers.toNumber());
   }
 }
 
-async function connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive) {
+async function connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers) {
   if (signer !== null && ethers.utils.isAddress(contractAddress)) {
     if (contract !== null) {
       const address = await contract.address;
@@ -82,7 +86,7 @@ async function connectContract(signer, contract, setContract, contractAddress, s
 
     const heritage = new ethers.Contract(contractAddress, Heritage.abi, signer);
     setContract(heritage);
-    updateContractData(heritage, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive);
+    updateContractData(heritage, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
     localStorage.setItem("contractAddress", contractAddress);
   } else {
     setContract(null);
@@ -119,7 +123,7 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
                 onKeyPress={event => {
                   if (event.key === 'Enter') {
                     onClose();
-                    connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive);
+                    connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
                   }
                 }}
               />
@@ -130,7 +134,7 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
               mr={3}
               onClick={() => {
                 onClose();
-                connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive);
+                connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
               }}>
                 OK
             </Button>
@@ -174,7 +178,7 @@ function getStoredContractAddress() {
   }
 }
     
-export default function Navbar({role, setRole, setAlive, setTimeAlive}) {
+export default function Navbar({role, setRole, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers}) {
   const { colorMode, toggleColorMode } = useColorMode();
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
@@ -191,14 +195,14 @@ export default function Navbar({role, setRole, setAlive, setTimeAlive}) {
   }, []);
 
   useEffect(() => {
-    connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive);
+    connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
   }, [signer]);
 
   return (
     <>
       <Flex as="nav" alignItems="center" padding="14px" borderBottomWidth="1px" fontSize='xl'>
         <Button onClick={async () => {
-          updateContractData(contract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive);
+          updateContractData(contract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
           const balance = await getEthBalance(signer, null);
           setWalletBalance(balance);
         }}>
