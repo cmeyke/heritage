@@ -7,10 +7,97 @@ import {
   Tbody,
   Td,
   Tr,
-  GridItem
+  GridItem,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalHeader,
+  ModalContent,
+  ModalCloseButton,
+  ModalBody,
+  Input,
+  ModalFooter,
 } from "@chakra-ui/react";
 
 import { updateAliveData } from "./Navbar";
+import { useRef, useState } from "react";
+
+function AliveButton({alive, timeAlive, contract, provider, setAlive, setTimeAlive}) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const inputRef = useRef(null);
+  const [newTimeAlive, setNewTimeAlive] = useState(timeAlive);
+
+return <>
+    <Button
+      onClick={() => {
+        setNewTimeAlive(timeAlive);
+        onOpen();
+      }}
+      fontSize='xl'
+    >
+      {alive} {alive == 1 ? "Day" : "Days"}
+    </Button>
+
+    <Modal initialFocusRef={inputRef} isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Alive Interval</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+          <Input
+            onChange={event => {
+              setNewTimeAlive(event.currentTarget.value);
+            }}
+            ref={inputRef}
+            placeholder='Address'
+            value={newTimeAlive}
+            onKeyPress={event => {
+              if (event.key === 'Enter') {
+                async function alive() {
+                  let time = 0;
+                  if (newTimeAlive != timeAlive) {
+                    time = newTimeAlive * 60 * 60 * 24;
+                  }
+                  const tx = await contract.alive(time);
+                  await tx.wait();
+                  updateAliveData(contract, provider, setAlive, setTimeAlive);
+                }
+                alive();
+                onClose();
+              }
+            }}
+          />
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            mr={3}
+            onClick={() => {
+              async function alive() {
+                let time = 0;
+                if (newTimeAlive != timeAlive) {
+                  time = newTimeAlive * 60 * 60 * 24;
+                }
+                const tx = await contract.alive(time);
+                await tx.wait();
+                updateAliveData(contract, provider, setAlive, setTimeAlive);
+              }
+              alive();
+              onClose();
+            }}
+          >
+            OK
+          </Button>
+          <Button onClick={() => {
+              onClose();
+            }}
+          >
+            Cancel
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  </>;
+}
 
 export default function Dashboard({provider, contract, role, alive, timeAlive, numberOfHeirs, numberOfAppointers, setAlive, setTimeAlive}) {
   return (
@@ -32,14 +119,16 @@ export default function Dashboard({provider, contract, role, alive, timeAlive, n
                 </Tr>
                 <Tr>
                   <Td>Alive left</Td>
-                  <Td><Button onClick={() => {
-                    async function alive() {
-                      const tx = await contract.alive(0);
-                      tx.wait();
-                      updateAliveData(contract, provider, setAlive, setTimeAlive);
-                    }
-                    alive();
-                  }} fontSize='xl'>{alive} {alive == 1 ? "Day" : "Days"}</Button></Td>
+                  <Td>
+                    <AliveButton
+                      alive={alive}
+                      timeAlive={timeAlive}
+                      contract={contract}
+                      provider={provider}
+                      setAlive={setAlive}
+                      setTimeAlive={setTimeAlive}
+                    />
+                  </Td>
                 </Tr>
                 <Tr>
                   <Td>Alive Interval</Td>
