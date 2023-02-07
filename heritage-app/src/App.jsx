@@ -4,6 +4,8 @@ import Dashboard from './components/Dashboard'
 import Navbar from './components/Navbar.jsx'
 
 function App() {
+  const [signer, setSigner] = useState(null);
+  const [contract, setContract] = useState(null);
   const [role, setRole] = useState("None");
   const [alive, setAlive] = useState("");
   const [timeAlive, setTimeAlive] = useState("");
@@ -13,7 +15,10 @@ function App() {
   return (
     <div className="App">
       <Navbar
-        role={role}
+        signer={signer}
+        setSigner={setSigner}
+        contract={contract}
+        setContract={setContract}
         setRole={setRole}
         setAlive={setAlive}
         setTimeAlive={setTimeAlive}
@@ -21,6 +26,8 @@ function App() {
         setNumberOfAppointers={setNumberOfAppointers}
       />
       <Dashboard
+        signer={signer}
+        contract={contract}
         role={role}
         alive={alive}
         timeAlive={timeAlive}

@@ -74,23 +74,24 @@ async function updateContractData(contract, contractAddress, setContractBalance,
   }
 }
 
-async function connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers) {
-  if (signer !== null && ethers.utils.isAddress(contractAddress)) {
+async function connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers) {
+  if (signer !== null && ethers.utils.isAddress(newAddress)) {
     if (contract !== null) {
       const address = await contract.address;
-      if (address.toLowerCase() === contractAddress.toLowerCase()) {
+      if (address.toLowerCase() === newAddress.toLowerCase()) {
         console.log("contract already connected");
-        return;
+        return true;
       }
     }
 
-    const heritage = new ethers.Contract(contractAddress, Heritage.abi, signer);
+    const heritage = new ethers.Contract(newAddress, Heritage.abi, signer);
     setContract(heritage);
-    updateContractData(heritage, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
-    localStorage.setItem("contractAddress", contractAddress);
-  } else {
-    setContract(null);
+    setContractAddress(newAddress);
+    updateContractData(heritage, newAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
+    localStorage.setItem("contractAddress", newAddress);
+    return true;
   }
+  return false;
 }
 
 function DisplayContractAddress({contract, contractAddress}) {
@@ -98,9 +99,10 @@ function DisplayContractAddress({contract, contractAddress}) {
   return <>{contract === null || address === "" ? "Connect" : address}</>;
 }
 
-function ContractButton({signer, contract, setContract, contractAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive}) {
+function ContractButton({signer, contract, setContract, contractAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const addressRef = useRef(null);
+  const [newAddress, setNewAddress] = useState(contractAddress);
 
   return (
     <>
@@ -116,14 +118,20 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
           <ModalBody>
             <FormControl>
               <Input
-                onChange={event => setContractAddress(event.currentTarget.value)}
+                onChange={event => {
+                  setNewAddress(event.currentTarget.value);
+                }}
                 ref={addressRef}
                 placeholder='Address'
-                value={contractAddress}
+                value={newAddress}
                 onKeyPress={event => {
                   if (event.key === 'Enter') {
-                    onClose();
-                    connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
+                    if (ethers.utils.isAddress(newAddress)) {
+                      onClose();
+                      connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);  
+                    } else {
+                      console.log("not a valid address!")
+                    }
                   }
                 }}
               />
@@ -133,12 +141,19 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
             <Button
               mr={3}
               onClick={() => {
-                onClose();
-                connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
+                if (ethers.utils.isAddress(newAddress)) {
+                  onClose();
+                  connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
+                } else {
+                  console.log("not a valid address!")
+                }
               }}>
                 OK
             </Button>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={() => {
+              setNewAddress(contractAddress);
+              onClose();
+            }}>Cancel</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -178,12 +193,10 @@ function getStoredContractAddress() {
   }
 }
     
-export default function Navbar({role, setRole, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers}) {
+export default function Navbar({signer, setSigner, contract, setContract, setRole, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers}) {
   const { colorMode, toggleColorMode } = useColorMode();
   const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
   const [address, setAddress] = useState("");
-  const [contract, setContract] = useState(null);
   const [contractAddress, setContractAddress] = useState(getStoredContractAddress());
   const [walletBalance, setWalletBalance] = useState("");
   const [contractBalance, setContractBalance] = useState("");
@@ -195,7 +208,7 @@ export default function Navbar({role, setRole, setAlive, setTimeAlive, setNumber
   }, []);
 
   useEffect(() => {
-    connectContract(signer, contract, setContract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
+    connectContract(signer, contract, setContract, contractAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
   }, [signer]);
 
   return (
@@ -241,6 +254,8 @@ export default function Navbar({role, setRole, setAlive, setTimeAlive, setNumber
           address={address}
           setAlive={setAlive}
           setTimeAlive={setTimeAlive}
+          setNumberOfHeirs={setNumberOfHeirs}
+          setNumberOfAppointers={setNumberOfAppointers}
         />
         <Text marginLeft="14px">
           {contractBalance ? "Ξ" : ""} {contractBalance}
