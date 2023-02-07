@@ -11,7 +11,6 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-  FormControl,
   Input,
   Text,
   AlertDialog,
@@ -120,26 +119,24 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
           <ModalHeader>Contract Address</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <FormControl>
-              <Input
-                onChange={event => {
-                  setNewAddress(event.currentTarget.value);
-                }}
-                ref={addressRef}
-                placeholder='Address'
-                value={newAddress}
-                onKeyPress={event => {
-                  if (event.key === 'Enter') {
-                    if (ethers.utils.isAddress(newAddress)) {
-                      onClose();
-                      connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);  
-                    } else {
-                      console.log("not a valid address!")
-                    }
+            <Input
+              onChange={event => {
+                setNewAddress(event.currentTarget.value);
+              }}
+              ref={addressRef}
+              placeholder='Address'
+              value={newAddress}
+              onKeyPress={event => {
+                if (event.key === 'Enter') {
+                  if (ethers.utils.isAddress(newAddress)) {
+                    onClose();
+                    connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);  
+                  } else {
+                    console.log("not a valid address!")
                   }
-                }}
-              />
-            </FormControl>
+                }
+              }}
+            />
           </ModalBody>
           <ModalFooter>
             <Button

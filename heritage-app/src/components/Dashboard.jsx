@@ -22,12 +22,22 @@ import {
 import { updateAliveData } from "./Navbar";
 import { useRef, useState } from "react";
 
+async function callAlive(newTimeAlive, timeAlive, contract, provider, setAlive, setTimeAlive) {
+  let time = 0;
+  if (newTimeAlive != timeAlive) {
+    time = newTimeAlive * 60 * 60 * 24;
+  }
+  const tx = await contract.alive(time);
+  await tx.wait();
+  updateAliveData(contract, provider, setAlive, setTimeAlive);
+}
+
 function AliveButton({alive, timeAlive, contract, provider, setAlive, setTimeAlive}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const inputRef = useRef(null);
   const [newTimeAlive, setNewTimeAlive] = useState(timeAlive);
 
-return <>
+  return <>
     <Button
       onClick={() => {
         setNewTimeAlive(timeAlive);
@@ -53,16 +63,7 @@ return <>
             value={newTimeAlive}
             onKeyPress={event => {
               if (event.key === 'Enter') {
-                async function alive() {
-                  let time = 0;
-                  if (newTimeAlive != timeAlive) {
-                    time = newTimeAlive * 60 * 60 * 24;
-                  }
-                  const tx = await contract.alive(time);
-                  await tx.wait();
-                  updateAliveData(contract, provider, setAlive, setTimeAlive);
-                }
-                alive();
+                callAlive(newTimeAlive, timeAlive, contract, provider, setAlive, setTimeAlive);
                 onClose();
               }
             }}
@@ -72,16 +73,7 @@ return <>
           <Button
             mr={3}
             onClick={() => {
-              async function alive() {
-                let time = 0;
-                if (newTimeAlive != timeAlive) {
-                  time = newTimeAlive * 60 * 60 * 24;
-                }
-                const tx = await contract.alive(time);
-                await tx.wait();
-                updateAliveData(contract, provider, setAlive, setTimeAlive);
-              }
-              alive();
+              callAlive(newTimeAlive, timeAlive, contract, provider, setAlive, setTimeAlive);
               onClose();
             }}
           >
