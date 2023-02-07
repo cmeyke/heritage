@@ -17,10 +17,16 @@ import {
   ModalBody,
   Input,
   ModalFooter,
+  Text,
+  Alert,
+  AlertIcon,
+  AlertTitle,
 } from "@chakra-ui/react";
 
 import { updateAliveData } from "./Navbar";
 import { useRef, useState } from "react";
+
+import { ethers } from "ethers";
 
 async function callAlive(newTimeAlive, timeAlive, contract, provider, setAlive, setTimeAlive) {
   let time = 0;
@@ -48,13 +54,14 @@ function AliveButton({alive, timeAlive, contract, provider, setAlive, setTimeAli
       {alive} {alive == 1 ? "Day" : "Days"}
     </Button>
 
-    <Modal initialFocusRef={inputRef} isOpen={isOpen} onClose={onClose}>
+    <Modal initialFocusRef={inputRef} isOpen={isOpen} onClose={onClose} size="xs">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Alive Interval</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Input
+            type="number"
             onChange={event => {
               setNewTimeAlive(event.currentTarget.value);
             }}
@@ -91,7 +98,106 @@ function AliveButton({alive, timeAlive, contract, provider, setAlive, setTimeAli
   </>;
 }
 
-export default function Dashboard({provider, contract, role, alive, timeAlive, numberOfHeirs, numberOfAppointers, setAlive, setTimeAlive}) {
+function AddressAlert({validAddress}) {
+  if (validAddress) {
+    return <></>;
+  }
+  return <>
+    <Alert marginTop="14px"  marginLeft="14px" status='error'>
+    <AlertIcon />
+      Not a valid ethereum address!
+    </Alert>
+  </>
+}
+
+function BalanceAlert({sufficientBalance}) {
+  if (sufficientBalance) {
+    return <></>;
+  }
+  return <>
+    <Alert marginTop="14px"  marginLeft="14px" status='error'>
+    <AlertIcon />
+      Insufficient balance!
+    </Alert>
+  </>
+}
+
+function SendEther({contract, provider, contractAddress}) {
+  const [recipientAddress, setRecipientAddress] = useState("");
+  const [sendAmount, setSendAmount] = useState("");
+  const [validAddress, setValidAddress] = useState(true);
+  const [sufficientBalance, setSufficientBalance] = useState(true);
+
+  return <>
+    <Heading marginLeft="14px"m>
+      Send Ether
+    </Heading>
+    <AddressAlert
+      validAddress={validAddress}
+    />
+    <BalanceAlert
+      sufficientBalance={sufficientBalance}
+    />
+    <TableContainer>
+      <Table>
+        <Tbody>
+          <Tr>
+            <Td w="1px">Recipient:</Td>
+            <Td>
+              <Input
+                onChange={event => {
+                  setRecipientAddress(event.currentTarget.value);
+                }}
+                placeholder="Recipient's Address"
+              />
+            </Td>
+          </Tr>
+          <Tr>
+            <Td w="1px">Amount:</Td>
+            <Td>
+              <Input
+                onChange={event => {
+                  setSendAmount(event.currentTarget.value);
+                }}
+                placeholder="Amount"
+                type="number"
+              />
+            </Td>
+          </Tr>
+          <Tr>
+            <Td>
+              <Button
+                fontSize='xl'
+                onClick={() => {
+                  async function transfer() {
+                    const value = ethers.utils.parseEther(sendAmount);
+                    const balance = await provider.getBalance(contractAddress);
+                    if (balance >= value) {
+                      setSufficientBalance(true);
+                      const tx = await contract.executeTransaction(recipientAddress, value, "0x");
+                      await tx.wait();
+                    } else {
+                      setSufficientBalance(false);
+                    }
+                  }
+                  if (ethers.utils.isAddress(recipientAddress)) {
+                    setValidAddress(true);
+                    transfer();
+                  } else {
+                    setValidAddress(false);
+                  }
+                }}
+              >
+                Send
+              </Button></Td>
+          </Tr>
+        </Tbody>
+      </Table>
+    </TableContainer>
+  </>;
+}
+
+export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, numberOfAppointers, setAlive, setTimeAlive}) {
   return (
     <Grid
       templateColumns="repeat(3, 1fr)"
@@ -139,9 +245,11 @@ export default function Dashboard({provider, contract, role, alive, timeAlive, n
           </TableContainer>
       </GridItem>
       <GridItem colSpan="2"  fontSize='xl' textAlign="left">
-        <Heading>
-          Send Ether
-        </Heading>
+        <SendEther
+          contract={contract}
+          provider={provider}
+          contractAddress={contractAddress}
+        />
       </GridItem>
     </Grid>
   )

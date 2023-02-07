@@ -113,7 +113,7 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
         <DisplayContractAddress contract={contract} contractAddress={contractAddress} />
       </Button>
 
-      <Modal initialFocusRef={addressRef} isOpen={isOpen} onClose={onClose}>
+      <Modal initialFocusRef={addressRef} isOpen={isOpen} onClose={onClose} size="lg">
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Contract Address</ModalHeader>
@@ -184,20 +184,10 @@ async function getEthBalance(signer, provider, address) {
   }
   return formaterETH(balance);
 }
-
-function getStoredContractAddress() {
-  const address = localStorage.getItem("contractAddress");
-  if (address === null) {
-    return "";
-  } else {
-    return address;
-  }
-}
     
-export default function Navbar({signer, provider, setProvider, setSigner, contract, setContract, setRole, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers}) {
+export default function Navbar({signer, provider, setProvider, setSigner, contract, contractAddress, setContractAddress, setContract, setRole, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers}) {
   const { colorMode, toggleColorMode } = useColorMode();
   const [address, setAddress] = useState("");
-  const [contractAddress, setContractAddress] = useState(getStoredContractAddress());
   const [walletBalance, setWalletBalance] = useState("");
   const [contractBalance, setContractBalance] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();

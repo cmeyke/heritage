@@ -3,9 +3,19 @@ import './App.css'
 import Dashboard from './components/Dashboard'
 import Navbar from './components/Navbar.jsx'
 
+function getStoredContractAddress() {
+  const address = localStorage.getItem("contractAddress");
+  if (address === null) {
+    return "";
+  } else {
+    return address;
+  }
+}
+
 function App() {
   const [signer, setSigner] = useState(null);
   const [contract, setContract] = useState(null);
+  const [contractAddress, setContractAddress] = useState(getStoredContractAddress());
   const [role, setRole] = useState("None");
   const [alive, setAlive] = useState("");
   const [timeAlive, setTimeAlive] = useState("");
@@ -21,6 +31,8 @@ function App() {
         setProvider={setProvider}
         setSigner={setSigner}
         contract={contract}
+        contractAddress={contractAddress}
+        setContractAddress={setContractAddress}
         setContract={setContract}
         setRole={setRole}
         setAlive={setAlive}
@@ -31,6 +43,7 @@ function App() {
       <Dashboard
         provider={provider}
         contract={contract}
+        contractAddress={contractAddress}
         role={role}
         alive={alive}
         timeAlive={timeAlive}
