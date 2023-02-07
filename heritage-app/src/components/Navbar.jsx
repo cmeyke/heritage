@@ -49,6 +49,16 @@ async function connectWallet(setSigner, setAddress, setWalletBalance, setProvide
   return true;
 }
 
+export async function updateAliveData(contract, provider, setAlive, setTimeAlive) {
+  const timeAlive = (await contract.timeAlive()).toNumber();
+  const startTime = (await contract.startTime()).toNumber();
+  const blockNumber = await provider.getBlockNumber()
+  const timestamp = (await provider.getBlock(blockNumber)).timestamp;
+  const alive = Math.round((startTime + timeAlive - timestamp) / (60*60*24));
+  setAlive(alive);
+  setTimeAlive(Math.round(timeAlive/(60*60*24)));
+}
+
 async function updateContractData(contract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers) {
   if (contract !== null) {
     const balance = await getEthBalance(null, provider, contractAddress);
@@ -60,13 +70,7 @@ async function updateContractData(contract, contractAddress, setContractBalance,
     } else if (await contract.hasRole(HEIR_ROLE, address)) {
       setRole("Heir");
     }
-    const timeAlive = (await contract.timeAlive()).toNumber();
-    const startTime = (await contract.startTime()).toNumber();
-    const blockNumber = await provider.getBlockNumber()
-    const timestamp = (await provider.getBlock(blockNumber)).timestamp;
-    const alive = Math.round((startTime + timeAlive - timestamp) / (60*60*24));
-    setAlive(alive);
-    setTimeAlive(Math.round(timeAlive/(60*60*24)));
+    updateAliveData(contract, provider, setAlive, setTimeAlive);
     const numberOfHeirs = await contract.getRoleMemberCount(HEIR_ROLE);
     setNumberOfHeirs(numberOfHeirs.toNumber());
     const numberOfAppointers = await contract.getRoleMemberCount(APPOINTER_ROLE);
@@ -193,9 +197,8 @@ function getStoredContractAddress() {
   }
 }
     
-export default function Navbar({signer, setSigner, contract, setContract, setRole, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers}) {
+export default function Navbar({signer, provider, setProvider, setSigner, contract, setContract, setRole, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers}) {
   const { colorMode, toggleColorMode } = useColorMode();
-  const [provider, setProvider] = useState(null);
   const [address, setAddress] = useState("");
   const [contractAddress, setContractAddress] = useState(getStoredContractAddress());
   const [walletBalance, setWalletBalance] = useState("");

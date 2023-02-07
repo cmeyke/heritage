@@ -11,11 +11,14 @@ function App() {
   const [timeAlive, setTimeAlive] = useState("");
   const [numberOfHeirs, setNumberOfHeirs] = useState("");
   const [numberOfAppointers, setNumberOfAppointers] = useState("");
+  const [provider, setProvider] = useState(null);
 
   return (
     <div className="App">
       <Navbar
         signer={signer}
+        provider={provider}
+        setProvider={setProvider}
         setSigner={setSigner}
         contract={contract}
         setContract={setContract}
@@ -26,13 +29,15 @@ function App() {
         setNumberOfAppointers={setNumberOfAppointers}
       />
       <Dashboard
-        signer={signer}
+        provider={provider}
         contract={contract}
         role={role}
         alive={alive}
         timeAlive={timeAlive}
         numberOfHeirs={numberOfHeirs}
         numberOfAppointers={numberOfAppointers}
+        setAlive={setAlive}
+        setTimeAlive={setTimeAlive}
       />
     </div>
   )

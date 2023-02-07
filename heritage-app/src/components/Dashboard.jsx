@@ -10,7 +10,9 @@ import {
   GridItem
 } from "@chakra-ui/react";
 
-export default function Dashboard({signer, contract, role, alive, timeAlive, numberOfHeirs, numberOfAppointers}) {
+import { updateAliveData } from "./Navbar";
+
+export default function Dashboard({provider, contract, role, alive, timeAlive, numberOfHeirs, numberOfAppointers, setAlive, setTimeAlive}) {
   return (
     <Grid
       templateColumns="repeat(3, 1fr)"
@@ -30,7 +32,14 @@ export default function Dashboard({signer, contract, role, alive, timeAlive, num
                 </Tr>
                 <Tr>
                   <Td>Alive left</Td>
-                  <Td><Button fontSize='xl'>{alive} {alive == 1 ? "Day" : "Days"}</Button></Td>
+                  <Td><Button onClick={() => {
+                    async function alive() {
+                      const tx = await contract.alive(0);
+                      tx.wait();
+                      updateAliveData(contract, provider, setAlive, setTimeAlive);
+                    }
+                    alive();
+                  }} fontSize='xl'>{alive} {alive == 1 ? "Day" : "Days"}</Button></Td>
                 </Tr>
                 <Tr>
                   <Td>Alive Interval</Td>
