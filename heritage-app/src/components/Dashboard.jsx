@@ -96,12 +96,12 @@ function AliveButton({alive, timeAlive, contract, provider, setAlive, setTimeAli
   </>;
 }
 
-function AddressAlert({validAddress}) {
+export function AddressAlert({validAddress, marginTop, marginLeft}) {
   if (validAddress) {
     return <></>;
   }
   return <>
-    <Alert marginTop="14px"  marginLeft="14px" status='error'>
+    <Alert marginTop={marginTop}  marginLeft={marginLeft} status='error'>
     <AlertIcon />
       Not a valid ethereum address!
     </Alert>
@@ -132,6 +132,8 @@ function SendEther({contract, provider, contractAddress}) {
     </Heading>
     <AddressAlert
       validAddress={validAddress}
+      marginTop="14px"
+      marginLeft="14px"
     />
     <BalanceAlert
       sufficientBalance={sufficientBalance}

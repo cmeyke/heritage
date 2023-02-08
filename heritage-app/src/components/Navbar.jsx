@@ -33,6 +33,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ethers } from "ethers";
 
 import Heritage from '../artifacts/contracts/Heritage.sol/Heritage.json';
+import { AddressAlert } from './Dashboard';
 
 async function connectWallet(setSigner, setAddress, setWalletBalance, setProvider) {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -226,6 +227,7 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
   const { isOpen, onOpen, onClose } = useDisclosure();
   const addressRef = useRef(null);
   const [newAddress, setNewAddress] = useState(contractAddress);
+  const [validAddress, setValidAddress] = useState(true);
 
   return (
     <>
@@ -249,14 +251,20 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
               onKeyPress={event => {
                 if (event.key === 'Enter') {
                   if (ethers.utils.isAddress(newAddress)) {
+                    setValidAddress(true);
                     onClose();
                     connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);  
                   } else {
-                    console.log("not a valid address!")
+                    setValidAddress(false);
                   }
                 }
               }}
             />
+            <AddressAlert
+              validAddress={validAddress}
+              marginTop="14px"
+              marginLeft="0px"        
+            /> 
           </ModalBody>
           <ModalFooter>
             <DeployButton
@@ -268,10 +276,11 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
               mr={3}
               onClick={() => {
                 if (ethers.utils.isAddress(newAddress)) {
+                  setValidAddress(true);
                   onClose();
                   connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
                 } else {
-                  console.log("not a valid address!")
+                  setValidAddress(false);
                 }
               }}>
                 OK
