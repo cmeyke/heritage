@@ -161,6 +161,7 @@ function SendEther({contract, provider, contractAddress}) {
                 }}
                 placeholder="Amount"
                 type="number"
+                value={sendAmount}
               />
             </Td>
           </Tr>
@@ -189,7 +190,24 @@ function SendEther({contract, provider, contractAddress}) {
                 }}
               >
                 Send
-              </Button></Td>
+              </Button>
+            </Td>
+            <Td>
+              <Button
+                fontSize='xl'
+                onClick={() => {
+                  async function max() {
+                    const balance = await provider.getBalance(contractAddress);
+                    const amount = ethers.utils.formatUnits(balance);
+                    console.log(amount, typeof amount);
+                    setSendAmount(amount);
+                  }
+                  max();
+                }}
+              >
+                Max
+              </Button>
+            </Td>
           </Tr>
         </Tbody>
       </Table>
