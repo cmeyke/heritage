@@ -276,6 +276,7 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
             <DeployButton
               signer={signer}
             />
+            <Spacer />
             <Button
               ml={3}
               mr={3}
