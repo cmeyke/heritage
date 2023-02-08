@@ -17,10 +17,8 @@ import {
   ModalBody,
   Input,
   ModalFooter,
-  Text,
   Alert,
   AlertIcon,
-  AlertTitle,
 } from "@chakra-ui/react";
 
 import { updateAliveData } from "./Navbar";
