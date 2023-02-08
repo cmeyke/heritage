@@ -199,7 +199,6 @@ function SendEther({contract, provider, contractAddress}) {
                   async function max() {
                     const balance = await provider.getBalance(contractAddress);
                     const amount = ethers.utils.formatUnits(balance);
-                    console.log(amount, typeof amount);
                     setSendAmount(amount);
                   }
                   max();
