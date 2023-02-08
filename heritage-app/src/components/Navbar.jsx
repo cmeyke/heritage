@@ -19,6 +19,14 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
+  Spinner,
+  Alert,
+  AlertIcon,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Tr,
 } from '@chakra-ui/react'
 import {
   MoonIcon,
@@ -102,6 +110,132 @@ function DisplayContractAddress({contract, contractAddress}) {
   return <>{contract === null || address === "" ? "Connect" : address}</>;
 }
 
+function ShowBusy({busy}) {
+  if (busy) {
+    return <Spinner />;
+  }
+  return <></>;
+}
+
+function DeploySuccess({contractAddress}) {
+  if (contractAddress !== "") {
+    return <>
+      <Alert marginTop={3} status='success'>
+        <AlertIcon />
+          New contract address: {contractAddress}
+      </Alert>
+    </>;
+  }
+  return <></>;
+}
+
+function DeployButton({signer}) {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const inputRef = useRef(null);
+  const [amount, setAmount] = useState("0");
+  const [busy, setBusy] = useState(false);
+  const [contractAddress, setContractAddress] = useState("");
+  const [heirAddress, setHeirAddress] = useState("");
+  const [alive, setAlive] = useState("365");
+
+  return <>
+    <Button
+      colorScheme='red'
+      onClick={onOpen}
+    >
+      Deploy New
+    </Button>
+
+    <Modal
+      initialFocusRef={inputRef}
+      isOpen={isOpen}
+      onClose={onClose}
+      size="lg"
+      closeOnEsc={false}
+      closeOnOverlayClick={false}
+    >
+      <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Deploy New Heritage Contract</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>
+              Initial Ether Amount:
+            </Text>
+            <Input
+              type='number'
+              onChange={event => {
+                setAmount(event.currentTarget.value);
+              }}
+              ref={inputRef}
+              placeholder='Amount'
+              value={amount}
+            />
+            <Text marginTop={3}>
+              Alive Interval:
+            </Text>
+            <Input
+              type='number'
+              onChange={event => {
+                setAlive(event.currentTarget.value);
+              }}
+              placeholder='Alive Interval'
+              value={alive}
+            />
+            <Text marginTop={3}>
+              Heir Address:
+            </Text>
+            <Input
+              onChange={event => {
+                setHeirAddress(event.currentTarget.value);
+              }}
+              placeholder='Heir Address'
+              value={heirAddress}
+            />
+            <DeploySuccess
+              contractAddress={contractAddress}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <ShowBusy
+              busy={busy}
+            />
+            <Button
+              ml={3}
+              mr={3}
+              colorScheme='red'
+              onClick={() => {
+                async function deploy() {
+                  setBusy(true);
+                  setContractAddress("");
+                  const value = ethers.utils.parseEther(amount);
+                  console.log(heirAddress, alive*60*60*24, value.toString());
+                  const Contract = new ethers.ContractFactory(Heritage.abi, Heritage.bytecode, signer);
+                  const contract = await Contract.deploy(heirAddress, alive*60*60*24, { value: value });                                
+                  setContractAddress(contract.address);
+                  setBusy(false);
+                }
+                if (!busy) {
+                  deploy();
+                }  
+              }}>
+                Deploy
+            </Button>
+            <Button
+              onClick={() => {
+                if (!busy) {
+                  onClose();
+                }
+              }}
+            >
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+  </>;
+}
+
 function ContractButton({signer, contract, setContract, contractAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const addressRef = useRef(null);
@@ -139,7 +273,11 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
             />
           </ModalBody>
           <ModalFooter>
+            <DeployButton
+              signer={signer}
+            />
             <Button
+              ml={3}
               mr={3}
               onClick={() => {
                 if (ethers.utils.isAddress(newAddress)) {
@@ -151,10 +289,14 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
               }}>
                 OK
             </Button>
-            <Button onClick={() => {
-              setNewAddress(contractAddress);
-              onClose();
-            }}>Cancel</Button>
+            <Button
+              onClick={() => {
+                setNewAddress(contractAddress);
+                onClose();
+              }}
+            >
+              Cancel
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
