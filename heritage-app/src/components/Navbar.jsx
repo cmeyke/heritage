@@ -22,11 +22,6 @@ import {
   Spinner,
   Alert,
   AlertIcon,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Tr,
 } from '@chakra-ui/react'
 import {
   MoonIcon,
@@ -87,14 +82,6 @@ async function updateContractData(contract, contractAddress, setContractBalance,
 
 async function connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers) {
   if (signer !== null && ethers.utils.isAddress(newAddress)) {
-    if (contract !== null) {
-      const address = await contract.address;
-      if (address.toLowerCase() === newAddress.toLowerCase()) {
-        console.log("contract already connected");
-        return true;
-      }
-    }
-
     const heritage = new ethers.Contract(newAddress, Heritage.abi, signer);
     setContract(heritage);
     setContractAddress(newAddress);
@@ -209,7 +196,6 @@ function DeployButton({signer}) {
                   setBusy(true);
                   setContractAddress("");
                   const value = ethers.utils.parseEther(amount);
-                  console.log(heirAddress, alive*60*60*24, value.toString());
                   const Contract = new ethers.ContractFactory(Heritage.abi, Heritage.bytecode, signer);
                   const contract = await Contract.deploy(heirAddress, alive*60*60*24, { value: value });                                
                   setContractAddress(contract.address);
@@ -358,13 +344,9 @@ export default function Navbar({signer, provider, setProvider, setSigner, contra
           Wallet:
         </Text>
         <Button marginLeft="14px" onClick={async () => {
-            if (address === "") {
-              const connected = await connectWallet(setSigner, setAddress, setWalletBalance, setProvider, setProvider);
-              if (!connected) {
-                onOpen();
-              }
-            } else {
-              console.log("already connected:", address);
+            const connected = await connectWallet(setSigner, setAddress, setWalletBalance, setProvider, setProvider);
+            if (!connected) {
+              onOpen();
             }
           }}>
           {address === "" ? "Connect" : formatAddress(address)}
