@@ -425,6 +425,7 @@ export default function Dashboard({provider, contract, contractAddress, role, al
                 <Tr>
                   <Td>Alive left</Td>
                   <Td>
+                    {role === "Appointer" ?
                     <AliveButton
                       alive={alive}
                       timeAlive={timeAlive}
@@ -432,7 +433,7 @@ export default function Dashboard({provider, contract, contractAddress, role, al
                       provider={provider}
                       setAlive={setAlive}
                       setTimeAlive={setTimeAlive}
-                    />
+                    /> : alive}
                   </Td>
                 </Tr>
                 <Tr>
@@ -464,7 +465,8 @@ export default function Dashboard({provider, contract, contractAddress, role, al
           />
       </GridItem>
       <GridItem colSpan="2"  fontSize='xl' textAlign="left">
-        <SendEther
+        {role === "Appointer" ?
+        <><SendEther
           contract={contract}
           provider={provider}
           contractAddress={contractAddress}
@@ -475,7 +477,7 @@ export default function Dashboard({provider, contract, contractAddress, role, al
           setAppointers={setAppointers}
           setNumberOfAppointers={setNumberOfAppointers}
           contract={contract}
-        />
+        /></> : <></>}
       </GridItem>
     </Grid>
   )

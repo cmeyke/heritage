@@ -72,6 +72,8 @@ async function updateContractData(contract, contractAddress, setContractBalance,
       setRole("Appointer");
     } else if (await contract.hasRole(HEIR_ROLE, address)) {
       setRole("Heir");
+    } else {
+      setRole("None");
     }
     updateAliveData(contract, provider, setAlive, setTimeAlive);
     const numberOfHeirs = await contract.getRoleMemberCount(HEIR_ROLE);
