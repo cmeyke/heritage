@@ -19,6 +19,9 @@ import {
   ModalFooter,
   Alert,
   AlertIcon,
+  List,
+  ListItem,
+  Box,
 } from "@chakra-ui/react";
 
 import { updateAliveData } from "./Navbar";
@@ -128,7 +131,7 @@ function SendEther({contract, provider, contractAddress}) {
   const [sufficientBalance, setSufficientBalance] = useState(true);
 
   return <>
-    <Heading marginLeft="14px"m>
+    <Heading marginLeft="14px">
       Send Ether
     </Heading>
     <AddressAlert
@@ -215,7 +218,82 @@ function SendEther({contract, provider, contractAddress}) {
   </>;
 }
 
-export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, numberOfAppointers, setAlive, setTimeAlive}) {
+function RoleManagement() {
+  return <>
+    <Heading marginLeft="14px" marginTop="14px">
+      Role Management
+    </Heading>
+  </>;
+}
+
+function ListArray({array, heading}) {
+  if (array.length > 0) {
+    return <Box marginLeft="28px" fontSize='lg'>
+      <Heading marginBottom="8px">
+        {heading}
+      </Heading>
+      <List>
+        {array.map(elem => <ListItem marginBottom="4px" key={elem}>{elem}</ListItem>)}
+      </List>
+    </Box>;
+  }
+  return <></>;
+}
+
+async function getHeirs(setHeirs, setNumberOfHeirs, contract) {
+  const HEIR_ROLE = await contract.HEIR_ROLE();
+  getRoleMembers(setHeirs, setNumberOfHeirs, contract, HEIR_ROLE);
+}
+
+async function getAppointers(setAppointers, setNumberOfAppointers, contract) {
+  const APPOINTER_ROLE = await contract.APPOINTER_ROLE();
+  getRoleMembers(setAppointers, setNumberOfAppointers, contract, APPOINTER_ROLE);
+}
+
+async function getRoleMembers(setMembers, setNumberOfMembers, contract, role)
+{
+  const _numberOfMembers = await contract.getRoleMemberCount(role);
+  const numberOfMembers = _numberOfMembers.toNumber()
+  setNumberOfMembers(numberOfMembers);
+  const members = [];
+  for (let i = 0; i < numberOfMembers; i++) {
+    const member = await contract.getRoleMember(role, i);
+    members.push(member);
+  }
+  setMembers(members);
+}
+
+function HeirsButton({numberOfHeirs, setNumberOfHeirs, setHeirs, contract}) {
+  return <>
+    <Button
+      onClick={() => {
+        getHeirs(setHeirs, setNumberOfHeirs, contract);
+      }}
+      fontSize='xl'
+    >
+      {numberOfHeirs}
+    </Button>
+  </>;
+}
+
+function AppointersButton({numberOfAppointers, setNumberOfAppointers, setAppointers, contract}) {
+  return <>
+    <Button
+      onClick={() => {
+        getAppointers(setAppointers, setNumberOfAppointers, contract);
+      }}
+      fontSize='xl'
+    >
+      {numberOfAppointers}
+    </Button>
+  </>;
+}
+
+export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, setNumberOfHeirs, numberOfAppointers, setNumberOfAppointers, setAlive, setTimeAlive}) {
+  const [heirs, setHeirs] = useState([]);
+
+  const [appointers, setAppointers] = useState([]);
+
   return (
     <Grid
       templateColumns="repeat(3, 1fr)"
@@ -252,15 +330,37 @@ export default function Dashboard({provider, contract, contractAddress, role, al
                 </Tr>
                 <Tr>
                   <Td># Heirs</Td>
-                  <Td>{numberOfHeirs}</Td>
+                  <Td>
+                    <HeirsButton
+                      numberOfHeirs={numberOfHeirs}
+                      setNumberOfHeirs={setNumberOfHeirs}
+                      setHeirs={setHeirs}
+                      contract={contract}
+                    />
+                  </Td>
                 </Tr>
                 <Tr>
                   <Td># Appointers</Td>
-                  <Td>{numberOfAppointers}</Td>
+                  <Td>
+                    <AppointersButton
+                      numberOfAppointers={numberOfAppointers}
+                      setNumberOfAppointers={setNumberOfAppointers}
+                      setAppointers={setAppointers}
+                      contract={contract}
+                    />
+                  </Td>
                 </Tr>
               </Tbody>
             </Table>
           </TableContainer>
+          <ListArray
+            array={heirs}
+            heading="Heirs:"
+          />
+          <ListArray
+            array={appointers}
+            heading="Appointers:"
+          />
       </GridItem>
       <GridItem colSpan="2"  fontSize='xl' textAlign="left">
         <SendEther
@@ -268,6 +368,7 @@ export default function Dashboard({provider, contract, contractAddress, role, al
           provider={provider}
           contractAddress={contractAddress}
         />
+        <RoleManagement />
       </GridItem>
     </Grid>
   )
