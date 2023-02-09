@@ -55,16 +55,17 @@ function AliveButton({alive, timeAlive, contract, provider, setAlive, setTimeAli
     <Modal initialFocusRef={inputRef} isOpen={isOpen} onClose={onClose} size="xs">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Alive Interval</ModalHeader>
+        <ModalHeader>Renew Alive</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
+          Alive Interval Days:
           <Input
             type="number"
             onChange={event => {
               setNewTimeAlive(event.currentTarget.value);
             }}
             ref={inputRef}
-            placeholder='Address'
+            placeholder='Alive Interval Days'
             value={newTimeAlive}
             onKeyPress={event => {
               if (event.key === 'Enter') {

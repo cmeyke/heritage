@@ -160,14 +160,14 @@ function DeployButton({signer}) {
               value={amount}
             />
             <Text marginTop={3}>
-              Alive Interval:
+              Alive Interval Days:
             </Text>
             <Input
               type='number'
               onChange={event => {
                 setAlive(event.currentTarget.value);
               }}
-              placeholder='Alive Interval'
+              placeholder='Alive Interval Days'
               value={alive}
             />
             <Text marginTop={3}>
