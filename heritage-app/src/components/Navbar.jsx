@@ -100,9 +100,9 @@ function DisplayContractAddress({contract, contractAddress}) {
   return <>{contract === null || address === "" ? "Connect" : address}</>;
 }
 
-function ShowBusy({busy}) {
+export function ShowBusy({busy, marginRight}) {
   if (busy) {
-    return <Spinner />;
+    return <Spinner marginRight={marginRight} />;
   }
   return <></>;
 }
@@ -189,6 +189,7 @@ function DeployButton({signer}) {
           <ModalFooter>
             <ShowBusy
               busy={busy}
+              marginRight="0px"
             />
             <Button
               ml={3}
@@ -325,7 +326,7 @@ async function getEthBalance(signer, provider, address) {
   return formaterETH(balance);
 }
     
-async function getHeirs(setHeirs, setNumberOfHeirs, contract) {
+export async function getHeirs(setHeirs, setNumberOfHeirs, contract) {
   const HEIR_ROLE = await contract.HEIR_ROLE();
   getRoleMembers(setHeirs, setNumberOfHeirs, contract, HEIR_ROLE);
 }

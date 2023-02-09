@@ -24,7 +24,7 @@ import {
   Box,
 } from "@chakra-ui/react";
 
-import { updateAliveData } from "./Navbar";
+import { ShowBusy, getHeirs, updateAliveData } from "./Navbar";
 import { useRef, useState } from "react";
 
 import { ethers } from "ethers";
@@ -218,11 +218,130 @@ function SendEther({contract, provider, contractAddress}) {
   </>;
 }
 
-function RoleManagement() {
+function RoleManagement({setHeirs, setNumberOfHeirs, contract}) {
+  const [heirAddress, setHeirAddress] = useState("");
+  const [appointerAddress, setAppointerAddress] = useState("");
+  const [validHeirAddress, setValidHeirAddress] = useState(true);
+  const [validAppointerAddress, setValidAppointerAddress] = useState(true);
+  const [busy, setBusy] = useState(false);
+
   return <>
     <Heading marginLeft="14px" marginTop="14px">
+      <ShowBusy
+        busy={busy}
+        marginRight="14px"
+      />
       Role Management
     </Heading>
+    <Box marginTop="14px">
+      <AddressAlert
+        validAddress={validHeirAddress}
+        marginTop="14px"
+        marginLeft="14px"
+      />
+      <TableContainer>
+        <Table>
+          <Tbody>
+            <Tr>
+              <Td w="1px">Heir:</Td>
+              <Td>
+                <Input
+                  onChange={event => {
+                    setHeirAddress(event.currentTarget.value);
+                  }}
+                  placeholder="Heir's Address"
+                />
+              </Td>
+            </Tr>
+          </Tbody>
+        </Table>
+      </TableContainer>
+      <Box marginLeft="20px" marginTop="8px">
+        <Button
+          fontSize='xl'
+          onClick={() => {
+            if (ethers.utils.isAddress(heirAddress)) {
+              setValidHeirAddress(true);
+              async function inherit() {
+                setBusy(true);
+                try {
+                  const tx = await contract.inherit(heirAddress);
+                  await tx.wait();
+                  await getHeirs(setHeirs, setNumberOfHeirs, contract);
+                }
+                catch(ex) {
+                  console.log(ex);
+                }
+                setBusy(false);
+              }
+              inherit();
+            } else {
+              setValidHeirAddress(false);
+            }
+          }}
+        >
+          Add
+        </Button>
+        <Button
+          fontSize='xl'
+          marginLeft="28px"
+          onClick={() => {
+            if (ethers.utils.isAddress(heirAddress)) {
+              setValidHeirAddress(true);
+              async function disinherit() {
+                setBusy(true);
+                try {
+                  const tx = await contract.disinherit(heirAddress);
+                  await tx.wait();
+                  await getHeirs(setHeirs, setNumberOfHeirs, contract);
+                }
+                catch(ex) {
+                  console.log(ex);
+                }
+                setBusy(false);
+              }
+              disinherit();
+            } else {
+              setValidHeirAddress(false);
+            }
+          }}
+        >
+          Remove
+        </Button>
+      </Box>
+    </Box>
+    <Box marginTop="14px">
+      <AddressAlert
+          validAddress={validAppointerAddress}
+          marginTop="14px"
+          marginLeft="14px"
+        />
+      <TableContainer>
+        <Table>        
+          <Tbody>
+            <Tr>
+              <Td w="1px">Appointer:</Td>
+              <Td>
+                <Input
+                  onChange={event => {
+                    setAppointerAddress(event.currentTarget.value);
+                  }}
+                  placeholder="Heir's Address"
+                />
+              </Td>
+            </Tr>
+          </Tbody>
+        </Table>
+      </TableContainer>
+      <Box marginLeft="20px" marginTop="8px">
+        <Button fontSize='xl'>
+          Add
+        </Button>
+        <Button fontSize='xl' marginLeft="28px">
+          Remove
+        </Button>
+      </Box>
+    </Box>
   </>;
 }
 
@@ -240,7 +359,7 @@ function ListArray({array, heading}) {
   return <></>;
 }
 
-export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, numberOfAppointers, setAlive, setTimeAlive, heirs, appointers}) {
+export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, setNumberOfHeirs, numberOfAppointers, setAlive, setTimeAlive, heirs, setHeirs,appointers}) {
   return (
     <Grid
       templateColumns="repeat(3, 1fr)"
@@ -305,7 +424,11 @@ export default function Dashboard({provider, contract, contractAddress, role, al
           provider={provider}
           contractAddress={contractAddress}
         />
-        <RoleManagement />
+        <RoleManagement
+          setHeirs={setHeirs}
+          setNumberOfHeirs={setNumberOfHeirs}
+          contract={contract}
+        />
       </GridItem>
     </Grid>
   )
