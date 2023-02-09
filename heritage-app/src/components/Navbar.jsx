@@ -33,7 +33,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ethers } from "ethers";
 
 import Heritage from '../artifacts/contracts/Heritage.sol/Heritage.json';
-import { AddressAlert } from './Dashboard';
+import { AddressAlert, getAppointers, getHeirs } from './Dashboard';
 
 async function connectWallet(setSigner, setAddress, setWalletBalance, setProvider) {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -62,7 +62,7 @@ export async function updateAliveData(contract, provider, setAlive, setTimeAlive
   setTimeAlive(Math.round(timeAlive/(60*60*24)));
 }
 
-async function updateContractData(contract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers) {
+async function updateContractData(contract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers, setHeirs, setAppointers) {
   if (contract !== null) {
     const balance = await getEthBalance(null, provider, contractAddress);
     setContractBalance(balance);
@@ -78,15 +78,17 @@ async function updateContractData(contract, contractAddress, setContractBalance,
     setNumberOfHeirs(numberOfHeirs.toNumber());
     const numberOfAppointers = await contract.getRoleMemberCount(APPOINTER_ROLE);
     setNumberOfAppointers(numberOfAppointers.toNumber());
+    getHeirs(setHeirs, setNumberOfHeirs, contract);
+    getAppointers(setAppointers, setNumberOfAppointers, contract);
   }
 }
 
-async function connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers) {
+async function connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers, setHeirs, setAppointers) {
   if (signer !== null && ethers.utils.isAddress(newAddress)) {
     const heritage = new ethers.Contract(newAddress, Heritage.abi, signer);
     setContract(heritage);
     setContractAddress(newAddress);
-    updateContractData(heritage, newAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
+    updateContractData(heritage, newAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers, setHeirs, setAppointers);
     localStorage.setItem("contractAddress", newAddress);
     return true;
   }
@@ -223,7 +225,7 @@ function DeployButton({signer}) {
   </>;
 }
 
-function ContractButton({signer, contract, setContract, contractAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers}) {
+function ContractButton({signer, contract, setContract, contractAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers, setHeirs, setAppointers}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const addressRef = useRef(null);
   const [newAddress, setNewAddress] = useState(contractAddress);
@@ -253,7 +255,7 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
                   if (ethers.utils.isAddress(newAddress)) {
                     setValidAddress(true);
                     onClose();
-                    connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);  
+                    connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers, setHeirs, setAppointers);
                   } else {
                     setValidAddress(false);
                   }
@@ -278,7 +280,7 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
                 if (ethers.utils.isAddress(newAddress)) {
                   setValidAddress(true);
                   onClose();
-                  connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
+                  connectContract(signer, contract, setContract, newAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers, setHeirs, setAppointers);
                 } else {
                   setValidAddress(false);
                 }
@@ -323,7 +325,7 @@ async function getEthBalance(signer, provider, address) {
   return formaterETH(balance);
 }
     
-export default function Navbar({signer, provider, setProvider, setSigner, contract, contractAddress, setContractAddress, setContract, setRole, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers}) {
+export default function Navbar({signer, provider, setProvider, setSigner, contract, contractAddress, setContractAddress, setContract, setRole, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers, setHeirs, setAppointers}) {
   const { colorMode, toggleColorMode } = useColorMode();
   const [address, setAddress] = useState("");
   const [walletBalance, setWalletBalance] = useState("");
@@ -336,14 +338,14 @@ export default function Navbar({signer, provider, setProvider, setSigner, contra
   }, []);
 
   useEffect(() => {
-    connectContract(signer, contract, setContract, contractAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
+    connectContract(signer, contract, setContract, contractAddress, setContractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers, setHeirs, setAppointers);
   }, [signer]);
 
   return (
     <>
       <Flex as="nav" alignItems="center" padding="14px" borderBottomWidth="1px" fontSize='xl'>
         <Button onClick={async () => {
-          updateContractData(contract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers);
+          updateContractData(contract, contractAddress, setContractBalance, provider, setRole, address, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers, setHeirs, setAppointers);
           const balance = await getEthBalance(signer, null);
           setWalletBalance(balance);
         }}>
@@ -380,6 +382,8 @@ export default function Navbar({signer, provider, setProvider, setSigner, contra
           setTimeAlive={setTimeAlive}
           setNumberOfHeirs={setNumberOfHeirs}
           setNumberOfAppointers={setNumberOfAppointers}
+          setHeirs={setHeirs}
+          setAppointers={setAppointers}
         />
         <Text marginLeft="14px">
           {contractBalance ? "Ξ" : ""} {contractBalance}

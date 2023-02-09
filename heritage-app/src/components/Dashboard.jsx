@@ -240,12 +240,12 @@ function ListArray({array, heading}) {
   return <></>;
 }
 
-async function getHeirs(setHeirs, setNumberOfHeirs, contract) {
+export async function getHeirs(setHeirs, setNumberOfHeirs, contract) {
   const HEIR_ROLE = await contract.HEIR_ROLE();
   getRoleMembers(setHeirs, setNumberOfHeirs, contract, HEIR_ROLE);
 }
 
-async function getAppointers(setAppointers, setNumberOfAppointers, contract) {
+export async function getAppointers(setAppointers, setNumberOfAppointers, contract) {
   const APPOINTER_ROLE = await contract.APPOINTER_ROLE();
   getRoleMembers(setAppointers, setNumberOfAppointers, contract, APPOINTER_ROLE);
 }
@@ -263,37 +263,7 @@ async function getRoleMembers(setMembers, setNumberOfMembers, contract, role)
   setMembers(members);
 }
 
-function HeirsButton({numberOfHeirs, setNumberOfHeirs, setHeirs, contract}) {
-  return <>
-    <Button
-      onClick={() => {
-        getHeirs(setHeirs, setNumberOfHeirs, contract);
-      }}
-      fontSize='xl'
-    >
-      {numberOfHeirs}
-    </Button>
-  </>;
-}
-
-function AppointersButton({numberOfAppointers, setNumberOfAppointers, setAppointers, contract}) {
-  return <>
-    <Button
-      onClick={() => {
-        getAppointers(setAppointers, setNumberOfAppointers, contract);
-      }}
-      fontSize='xl'
-    >
-      {numberOfAppointers}
-    </Button>
-  </>;
-}
-
-export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, setNumberOfHeirs, numberOfAppointers, setNumberOfAppointers, setAlive, setTimeAlive}) {
-  const [heirs, setHeirs] = useState([]);
-
-  const [appointers, setAppointers] = useState([]);
-
+export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, setNumberOfHeirs, numberOfAppointers, setNumberOfAppointers, setAlive, setTimeAlive, heirs, setHeirs, appointers, setAppointers}) {
   return (
     <Grid
       templateColumns="repeat(3, 1fr)"
@@ -331,23 +301,13 @@ export default function Dashboard({provider, contract, contractAddress, role, al
                 <Tr>
                   <Td># Heirs</Td>
                   <Td>
-                    <HeirsButton
-                      numberOfHeirs={numberOfHeirs}
-                      setNumberOfHeirs={setNumberOfHeirs}
-                      setHeirs={setHeirs}
-                      contract={contract}
-                    />
+                    {numberOfHeirs}
                   </Td>
                 </Tr>
                 <Tr>
                   <Td># Appointers</Td>
                   <Td>
-                    <AppointersButton
-                      numberOfAppointers={numberOfAppointers}
-                      setNumberOfAppointers={setNumberOfAppointers}
-                      setAppointers={setAppointers}
-                      contract={contract}
-                    />
+                    {numberOfAppointers}
                   </Td>
                 </Tr>
               </Tbody>

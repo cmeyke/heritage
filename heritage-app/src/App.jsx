@@ -21,6 +21,9 @@ function App() {
   const [numberOfHeirs, setNumberOfHeirs] = useState("");
   const [numberOfAppointers, setNumberOfAppointers] = useState("");
   const [provider, setProvider] = useState(null);
+  const [heirs, setHeirs] = useState([]);
+  const [appointers, setAppointers] = useState([]);
+
 
   return (
     <div className="App">
@@ -38,6 +41,8 @@ function App() {
         setTimeAlive={setTimeAlive}
         setNumberOfHeirs={setNumberOfHeirs}
         setNumberOfAppointers={setNumberOfAppointers}
+        setHeirs={setHeirs}
+        setAppointers={setAppointers}
       />
       <Dashboard
         provider={provider}
@@ -52,6 +57,10 @@ function App() {
         setNumberOfAppointers={setNumberOfAppointers}
         setAlive={setAlive}
         setTimeAlive={setTimeAlive}
+        heirs={heirs}
+        setHeirs={setHeirs}
+        appointers={appointers}
+        setAppointers={setAppointers}
       />
     </div>
   )
