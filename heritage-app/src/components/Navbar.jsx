@@ -331,7 +331,7 @@ export async function getHeirs(setHeirs, setNumberOfHeirs, contract) {
   getRoleMembers(setHeirs, setNumberOfHeirs, contract, HEIR_ROLE);
 }
 
-async function getAppointers(setAppointers, setNumberOfAppointers, contract) {
+export async function getAppointers(setAppointers, setNumberOfAppointers, contract) {
   const APPOINTER_ROLE = await contract.APPOINTER_ROLE();
   getRoleMembers(setAppointers, setNumberOfAppointers, contract, APPOINTER_ROLE);
 }

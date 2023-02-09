@@ -24,7 +24,7 @@ import {
   Box,
 } from "@chakra-ui/react";
 
-import { ShowBusy, getHeirs, updateAliveData } from "./Navbar";
+import { ShowBusy, getAppointers, getHeirs, updateAliveData } from "./Navbar";
 import { useRef, useState } from "react";
 
 import { ethers } from "ethers";
@@ -218,7 +218,7 @@ function SendEther({contract, provider, contractAddress}) {
   </>;
 }
 
-function RoleManagement({setHeirs, setNumberOfHeirs, contract}) {
+function RoleManagement({setHeirs, setNumberOfHeirs, setAppointers, setNumberOfAppointers, contract}) {
   const [heirAddress, setHeirAddress] = useState("");
   const [appointerAddress, setAppointerAddress] = useState("");
   const [validHeirAddress, setValidHeirAddress] = useState(true);
@@ -326,7 +326,7 @@ function RoleManagement({setHeirs, setNumberOfHeirs, contract}) {
                   onChange={event => {
                     setAppointerAddress(event.currentTarget.value);
                   }}
-                  placeholder="Heir's Address"
+                  placeholder="Appointer's Address"
                 />
               </Td>
             </Tr>
@@ -334,10 +334,55 @@ function RoleManagement({setHeirs, setNumberOfHeirs, contract}) {
         </Table>
       </TableContainer>
       <Box marginLeft="20px" marginTop="8px">
-        <Button fontSize='xl'>
+        <Button
+          fontSize='xl'
+          onClick={() => {
+            if (ethers.utils.isAddress(appointerAddress)) {
+              setValidAppointerAddress(true);
+              async function addAppointerAddress() {
+                setBusy(true);
+                try {
+                  const tx = await contract.addAppointerAddress(appointerAddress);
+                  await tx.wait();
+                  await getAppointers(setAppointers, setNumberOfAppointers, contract);
+                }
+                catch(ex) {
+                  console.log(ex);
+                }
+                setBusy(false);
+              }
+              addAppointerAddress();
+            } else {
+              setValidAppointerAddress(false);
+            }
+          }}
+        >
           Add
         </Button>
-        <Button fontSize='xl' marginLeft="28px">
+        <Button
+          fontSize='xl'
+          marginLeft="28px"
+          onClick={() => {
+            if (ethers.utils.isAddress(appointerAddress)) {
+              setValidAppointerAddress(true);
+              async function removeAppointerAddress() {
+                setBusy(true);
+                try {
+                  const tx = await contract.removeAppointerAddress(appointerAddress);
+                  await tx.wait();
+                  await getAppointers(setAppointers, setNumberOfAppointers, contract);
+                }
+                catch(ex) {
+                  console.log(ex);
+                }
+                setBusy(false);
+              }
+              removeAppointerAddress();
+            } else {
+              setValidAppointerAddress(false);
+            }
+          }}
+        >
           Remove
         </Button>
       </Box>
@@ -359,7 +404,7 @@ function ListArray({array, heading}) {
   return <></>;
 }
 
-export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, setNumberOfHeirs, numberOfAppointers, setAlive, setTimeAlive, heirs, setHeirs,appointers}) {
+export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, setNumberOfHeirs, numberOfAppointers, setNumberOfAppointers, setAlive, setTimeAlive, heirs, setHeirs, appointers, setAppointers}) {
   return (
     <Grid
       templateColumns="repeat(3, 1fr)"
@@ -427,6 +472,8 @@ export default function Dashboard({provider, contract, contractAddress, role, al
         <RoleManagement
           setHeirs={setHeirs}
           setNumberOfHeirs={setNumberOfHeirs}
+          setAppointers={setAppointers}
+          setNumberOfAppointers={setNumberOfAppointers}
           contract={contract}
         />
       </GridItem>
