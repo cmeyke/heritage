@@ -22,6 +22,8 @@ import {
   List,
   ListItem,
   Box,
+  Text,
+  Flex,
 } from "@chakra-ui/react";
 
 import { ShowBusy, getAppointers, getHeirs, updateAliveData } from "./Navbar";
@@ -404,6 +406,68 @@ function ListArray({array, heading}) {
   return <></>;
 }
 
+function Inherit({contract, provider}) {
+  const [claimable, setClaimable] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  return <Box marginLeft="14px">
+    <Heading>
+    <ShowBusy
+        busy={busy}
+        marginRight="14px"
+      />
+      Inheritence Management
+    </Heading>
+    <Button
+      marginTop="28px"
+      fontSize='xl'
+      onClick={() => {
+        async function checkClaim() {
+          const startTime = (await contract.startTime()).toNumber();
+          const timeAlive = (await contract.timeAlive()).toNumber();
+          const blockNumber = await provider.getBlockNumber()
+          const timestamp = (await provider.getBlock(blockNumber)).timestamp;
+          setClaimable(timestamp > (startTime + timeAlive));
+        }
+        checkClaim();
+      }}
+    >
+      Check Claim
+    </Button>
+    {claimable ?
+      <>
+        <Text marginTop="28px">
+          Inheritance is claimable!
+        </Text>
+        <Button
+          colorScheme='red'
+          marginTop="28px"
+          fontSize='xl'
+          onClick={() => {
+            async function acceptInheritance() {
+              setBusy(true);
+              try {
+                const tx = await contract.acceptInheritance(false);
+                await tx.wait();
+              }
+              catch(ex) {
+                console.log(ex);
+              }
+              setBusy(false);
+            }
+            acceptInheritance();
+          }
+        }>
+          Accept Inheritance
+        </Button>
+      </>
+      :
+      <>
+      </>
+    }
+  </Box>
+}
+
 export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, setNumberOfHeirs, numberOfAppointers, setNumberOfAppointers, setAlive, setTimeAlive, heirs, setHeirs, appointers, setAppointers}) {
   return (
     <Grid
@@ -477,7 +541,11 @@ export default function Dashboard({provider, contract, contractAddress, role, al
           setAppointers={setAppointers}
           setNumberOfAppointers={setNumberOfAppointers}
           contract={contract}
-        /></> : <></>}
+        /></> : role === "Heir" ?
+        <Inherit
+          contract={contract}
+          provider={provider}
+        /> : <></>}
       </GridItem>
     </Grid>
   )
