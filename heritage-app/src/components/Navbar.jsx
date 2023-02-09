@@ -33,7 +33,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ethers } from "ethers";
 
 import Heritage from '../artifacts/contracts/Heritage.sol/Heritage.json';
-import { AddressAlert, getAppointers, getHeirs } from './Dashboard';
+import { AddressAlert } from './Dashboard';
 
 async function connectWallet(setSigner, setAddress, setWalletBalance, setProvider) {
   const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -325,6 +325,29 @@ async function getEthBalance(signer, provider, address) {
   return formaterETH(balance);
 }
     
+async function getHeirs(setHeirs, setNumberOfHeirs, contract) {
+  const HEIR_ROLE = await contract.HEIR_ROLE();
+  getRoleMembers(setHeirs, setNumberOfHeirs, contract, HEIR_ROLE);
+}
+
+async function getAppointers(setAppointers, setNumberOfAppointers, contract) {
+  const APPOINTER_ROLE = await contract.APPOINTER_ROLE();
+  getRoleMembers(setAppointers, setNumberOfAppointers, contract, APPOINTER_ROLE);
+}
+
+async function getRoleMembers(setMembers, setNumberOfMembers, contract, role)
+{
+  const _numberOfMembers = await contract.getRoleMemberCount(role);
+  const numberOfMembers = _numberOfMembers.toNumber()
+  setNumberOfMembers(numberOfMembers);
+  const members = [];
+  for (let i = 0; i < numberOfMembers; i++) {
+    const member = await contract.getRoleMember(role, i);
+    members.push(member);
+  }
+  setMembers(members);
+}
+
 export default function Navbar({signer, provider, setProvider, setSigner, contract, contractAddress, setContractAddress, setContract, setRole, setAlive, setTimeAlive, setNumberOfHeirs, setNumberOfAppointers, setHeirs, setAppointers}) {
   const { colorMode, toggleColorMode } = useColorMode();
   const [address, setAddress] = useState("");

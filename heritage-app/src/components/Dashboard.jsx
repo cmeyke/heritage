@@ -229,7 +229,7 @@ function RoleManagement() {
 function ListArray({array, heading}) {
   if (array.length > 0) {
     return <Box marginLeft="28px" fontSize='lg'>
-      <Heading marginBottom="8px">
+      <Heading size="lg" marginBottom="8px">
         {heading}
       </Heading>
       <List>
@@ -240,30 +240,7 @@ function ListArray({array, heading}) {
   return <></>;
 }
 
-export async function getHeirs(setHeirs, setNumberOfHeirs, contract) {
-  const HEIR_ROLE = await contract.HEIR_ROLE();
-  getRoleMembers(setHeirs, setNumberOfHeirs, contract, HEIR_ROLE);
-}
-
-export async function getAppointers(setAppointers, setNumberOfAppointers, contract) {
-  const APPOINTER_ROLE = await contract.APPOINTER_ROLE();
-  getRoleMembers(setAppointers, setNumberOfAppointers, contract, APPOINTER_ROLE);
-}
-
-async function getRoleMembers(setMembers, setNumberOfMembers, contract, role)
-{
-  const _numberOfMembers = await contract.getRoleMemberCount(role);
-  const numberOfMembers = _numberOfMembers.toNumber()
-  setNumberOfMembers(numberOfMembers);
-  const members = [];
-  for (let i = 0; i < numberOfMembers; i++) {
-    const member = await contract.getRoleMember(role, i);
-    members.push(member);
-  }
-  setMembers(members);
-}
-
-export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, setNumberOfHeirs, numberOfAppointers, setNumberOfAppointers, setAlive, setTimeAlive, heirs, setHeirs, appointers, setAppointers}) {
+export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, numberOfAppointers, setAlive, setTimeAlive, heirs, appointers}) {
   return (
     <Grid
       templateColumns="repeat(3, 1fr)"

@@ -52,15 +52,11 @@ function App() {
         alive={alive}
         timeAlive={timeAlive}
         numberOfHeirs={numberOfHeirs}
-        setNumberOfHeirs={setNumberOfHeirs}
         numberOfAppointers={numberOfAppointers}
-        setNumberOfAppointers={setNumberOfAppointers}
         setAlive={setAlive}
         setTimeAlive={setTimeAlive}
         heirs={heirs}
-        setHeirs={setHeirs}
         appointers={appointers}
-        setAppointers={setAppointers}
       />
     </div>
   )
