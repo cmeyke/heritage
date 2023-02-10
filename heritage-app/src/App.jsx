@@ -23,6 +23,7 @@ function App() {
   const [provider, setProvider] = useState(null);
   const [heirs, setHeirs] = useState([]);
   const [appointers, setAppointers] = useState([]);
+  const [reload, setReload] = useState(false);
 
 
   return (
@@ -43,6 +44,8 @@ function App() {
         setNumberOfAppointers={setNumberOfAppointers}
         setHeirs={setHeirs}
         setAppointers={setAppointers}
+        reload={reload}
+        setReload={setReload}
       />
       <Dashboard
         provider={provider}
@@ -61,6 +64,8 @@ function App() {
         setHeirs={setHeirs}
         appointers={appointers}
         setAppointers={setAppointers}
+        reload={reload}
+        setReload={setReload}
       />
     </div>
   )

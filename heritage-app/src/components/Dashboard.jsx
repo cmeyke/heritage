@@ -406,7 +406,7 @@ function ListArray({array, heading}) {
   return <></>;
 }
 
-function Inherit({contract, provider}) {
+function Inherit({contract, provider, reload, setReload}) {
   const [claimable, setClaimable] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -454,6 +454,8 @@ function Inherit({contract, provider}) {
                 console.log(ex);
               }
               setBusy(false);
+              setClaimable(false);
+              setReload(!reload);
             }
             acceptInheritance();
           }
@@ -468,7 +470,7 @@ function Inherit({contract, provider}) {
   </Box>
 }
 
-export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, setNumberOfHeirs, numberOfAppointers, setNumberOfAppointers, setAlive, setTimeAlive, heirs, setHeirs, appointers, setAppointers}) {
+export default function Dashboard({provider, contract, contractAddress, role, alive, timeAlive, numberOfHeirs, setNumberOfHeirs, numberOfAppointers, setNumberOfAppointers, setAlive, setTimeAlive, heirs, setHeirs, appointers, setAppointers, reload, setReload}) {
   return (
     <Grid
       templateColumns="repeat(3, 1fr)"
@@ -545,6 +547,8 @@ export default function Dashboard({provider, contract, contractAddress, role, al
         <Inherit
           contract={contract}
           provider={provider}
+          reload={reload}
+          setReload={setReload}
         /> : <></>}
       </GridItem>
     </Grid>
