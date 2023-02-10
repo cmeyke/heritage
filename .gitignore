@@ -6,8 +6,8 @@ typechain
 typechain-types
 contracts.txt
 .DS_Store
+.~lock*
 
 # Hardhat files
 cache
 artifacts
-

@@ -422,7 +422,7 @@ function Inherit({contract, provider, reload, setReload}) {
         busy={busy}
         marginRight="14px"
       />
-      Inheritence Management
+      Inheritance Management
     </Heading>
     <Button
       marginTop="28px"
