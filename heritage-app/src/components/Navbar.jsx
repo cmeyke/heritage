@@ -123,7 +123,7 @@ function DeploySuccess({contractAddress}) {
   return <></>;
 }
 
-function DeployButton({signer}) {
+function DeployButton({signer, setGlobalContractAddress}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const inputRef = useRef(null);
   const [amount, setAmount] = useState("0");
@@ -207,6 +207,7 @@ function DeployButton({signer}) {
                   const Contract = new ethers.ContractFactory(Heritage.abi, Heritage.bytecode, signer);
                   const contract = await Contract.deploy(heirAddress, alive*60*60*24, { value: value });                                
                   setContractAddress(contract.address);
+                  setGlobalContractAddress(contract.address);
                   setBusy(false);
                 }
                 if (!busy) {
@@ -276,6 +277,7 @@ function ContractButton({signer, contract, setContract, contractAddress, setCont
           <ModalFooter>
             <DeployButton
               signer={signer}
+              setGlobalContractAddress={setNewAddress}
             />
             <Spacer />
             <Button
