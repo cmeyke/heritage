@@ -27,7 +27,7 @@ import {
 } from "@chakra-ui/react";
 
 import { ShowBusy, getAppointers, getHeirs, updateAliveData } from "./Navbar";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ethers } from "ethers";
 
@@ -409,6 +409,12 @@ function ListArray({array, heading}) {
 function Inherit({contract, provider, reload, setReload}) {
   const [claimable, setClaimable] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [negativeCheck, setNegativeCheck] = useState(false);
+
+  useEffect(() => {
+    setClaimable(false);
+    setNegativeCheck(false);
+  }, [contract])
 
   return <Box marginLeft="14px">
     <Heading>
@@ -427,7 +433,9 @@ function Inherit({contract, provider, reload, setReload}) {
           const timeAlive = (await contract.timeAlive()).toNumber();
           const blockNumber = await provider.getBlockNumber()
           const timestamp = (await provider.getBlock(blockNumber)).timestamp;
-          setClaimable(timestamp > (startTime + timeAlive));
+          const claimable = timestamp > (startTime + timeAlive);
+          setClaimable(claimable);
+          setNegativeCheck(!claimable);
         }
         checkClaim();
       }}
@@ -463,8 +471,12 @@ function Inherit({contract, provider, reload, setReload}) {
           Accept Inheritance
         </Button>
       </>
-      :
-      <>
+      : negativeCheck ?
+        <Text marginTop="28px">
+          Inheritance is not claimable!
+        </Text>
+        :
+        <>
       </>
     }
   </Box>
